@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Plan 120 días</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e8eaeb;--fg:#14181b;--card:255,255,255;--accent:#e8480f;--mut:#5d676e;--op:.88;--bl:8px;--r:8px;--fs:16px;--ff:"Barlow",system-ui,-apple-system,sans-serif;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181b;--fg:#e9ecee;--card:30,36,40;--mut:#98a3aa}}
+:root[data-theme="dark"]{--bg:#14181b;--fg:#e9ecee;--card:30,36,40;--mut:#98a3aa}
+*{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.45 var(--ff)}
+main{max-width:680px;margin:0 auto;padding:10px 12px 96px}
+h2{font-family:"Barlow Condensed",var(--ff);font-size:1.9em;margin:8px 0 2px;letter-spacing:.01em}
+.card,details{background:rgba(var(--card),var(--op));backdrop-filter:blur(var(--bl));-webkit-backdrop-filter:blur(var(--bl));border-radius:var(--r);padding:10px 12px;margin:10px 0;border:1px solid rgba(128,128,128,.22)}
+summary{cursor:pointer;font-weight:600}
+.i{margin:10px 0 0;padding-top:8px;border-top:1px solid rgba(128,128,128,.22)}
+select,input,textarea,button{font:inherit;color:inherit;background:rgba(128,128,128,.13);border:1px solid rgba(128,128,128,.3);border-radius:var(--r);padding:8px;max-width:100%}
+select{width:100%;margin:4px 0}
+button{background:var(--accent);color:#fff;border:0;cursor:pointer;font-weight:600}
+input[type=range],input[type=color]{padding:2px;width:100%}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;gap:2px;background:rgba(var(--card),.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(128,128,128,.25)}
+nav button{flex:1;background:none;color:var(--mut);font-size:.8em;padding:9px 2px}
+nav button.on{color:var(--accent);box-shadow:inset 0 -3px 0 var(--accent)}
+.mut{color:var(--mut);font-size:.88em}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}td,th{padding:5px 4px;text-align:left;vertical-align:middle}
+td input{width:76px}
+.fb{display:flex;gap:6px}.fb button{flex:1;background:rgba(128,128,128,.18);color:var(--fg)}.fb button.on{background:var(--accent);color:#fff}
+label{display:block;margin:10px 0 2px;font-weight:600}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style></head><body>
+<main id="v"></main>
+<nav><button data-t="d">Dieta</button><button data-t="e">Entreno</button><button data-t="r">Running</button><button data-t="p">Progreso</button><button data-t="a">Ajustes</button></nav>
+<script>
+const $=s=>document.querySelector(s);
+const st={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let S=Object.assign({start:"",w:0,meals:{},log:{},run:{},prog:[],shop:{},set:{}},st.get("p120",{}));
+const save=()=>st.set("p120",S);
+let T="d",OD=-1;
+const D=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+const M={
+bat:["Batido de gofio con yogur proteico",650,40,85,15,"400 ml de leche, 50 g de gofio, 1 plátano y 15 g de crema de cacahuete: bátelo la noche anterior. Añade 1 yogur proteico."],
+tor:["Tortitas proteicas con fruta y skyr",600,40,70,15,"Avena, claras y 1 huevo en la sartén. Sirve con fruta y skyr."],
+ave:["Avena con huevo cocido y fruta",600,35,80,15,"80 g de copos en leche caliente, 1 huevo cocido y 1 fruta."],
+sky:["Skyr con nueces",200,20,15,6,"150-200 g de skyr natural y 20 g de nueces."],
+pav:["Pavo, fruta y almendras",220,18,20,8,"2 lonchas de pavo, 1 fruta y un puñado de almendras."],
+pre:["Plátano, tortitas de arroz y miel",250,6,55,1,"Tómalo 60-90 min antes de entrenar."],
+pan:["Pan integral con mermelada",250,7,52,2,"Alternativa de pre-entreno."],
+pa:["Pollo con arroz y verdura",760,51,86,20,"200 g de pollo y 100 g de arroz (crudos), 200 g de verdura y 15 g de aceite de oliva."],
+pp:["Pavo con pasta integral",740,50,85,18,"200 g de pavo, 120 g de pasta integral y verduras."],
+at:["Atún con patata y ensalada",700,50,80,16,"3 latas de atún, 300 g de patata o boniato cocidos y ensalada."],
+te:["Ternera magra con arroz",760,48,85,20,"Salteado de ternera con arroz y verduras."],
+pb:["Pollo con boniato",720,50,80,18,"200 g de pollo y 300 g de boniato asado."],
+me:["Merluza con patata y ensalada",600,40,55,20,"180 g de merluza al horno, 300 g de patata cocida y 10 g de aceite."],
+to:["Tortilla de 3 huevos, atún y pan",600,45,40,25,"Tortilla de 3 huevos, 1 lata de atún y pan integral."],
+hp:["Huevos, pavo y pan integral",580,45,40,22,"2-3 huevos, 100 g de pavo y pan integral."],
+no:["Ñoquis con pollo y salsa de setas",700,48,90,14,"250 g de ñoquis, 150 g de pollo, 150 g de setas, 100 ml de nata ligera y ajo. Dora el pollo, saltea las setas, añade la nata y mezcla con los ñoquis cocidos 2 min."],
+la:["Lasaña de carne",720,52,70,22,"3 placas, 150 g de carne magra, 200 g de tomate triturado y 60 g de queso light. Monta capas y hornea 25-30 min a 190 °C. Haz bandeja de 4 raciones."],
+pi:["Pizza proteica (air fryer)",760,60,65,25,"2 tortitas de harina, 200 g de carne picada, tomate y 60 g de mozzarella light. 6-8 min a 190 °C."],
+wr:["Wrap crujiente de pollo y queso",650,55,60,15,"2 wraps integrales, 160 g de pollo desmenuzado y 40 g de queso light. 5-10 min a 180 °C en air fryer."],
+br:["Bowl de arroz",750,55,85,20,"100 g de arroz, 180 g de pollo o ternera, 1 huevo, verduras y ¼ de aguacate."],
+bo:["Pasta boloñesa",750,50,90,20,"100 g de pasta, 150 g de carne picada, 200 g de tomate, verduras y 20 g de parmesano."],
+cu:["Curry de pollo con arroz",720,50,85,18,"180 g de pollo, 100 g de arroz, 100 ml de leche de coco light, 200 g de verduras y curry."],
+ha:["Hamburguesas caseras con patatas",800,55,70,28,"2 hamburguesas de 120 g de ternera o pavo, pan integral, 200 g de patata en air fryer y ensalada. Hamburguesas 15-18 min a 180 °C."],
+hb:["Hamburguesas de pollo y brócoli",500,45,15,20,"Pollo picado y brócoli en air fryer. Añade arroz o patata si necesitas más energía."]};
+const MAIN=["pa","pp","at","te","pb","me","to","hp","no","la","pi","wr","br","bo","cu","ha","hb"];
+const SL=[["Desayuno",["bat","tor","ave"]],["Media mañana",["sky","pav"]],["Almuerzo",MAIN],["Pre-entreno / snack",["pre","pan"]],["Cena",MAIN]];
+const DEF=d=>[d==5?"tor":"bat",["sky","pav"][d%2],["pa","pp","at","te","pb","bo","cu"][d],"pre",["me","to","pa","me","hp","pi","la"][d]];
+const gm=(d,s)=>S.meals[d+"|"+s]||DEF(d)[s];
+const SHOP=["Pechuga de pollo 1 kg","Pavo o ternera magra 600 g","Merluza o pescado blanco 600 g","Atún al natural 6 latas","Huevos 18","Skyr o yogur proteico 14","Leche semi 3 L","Arroz 700 g","Pasta integral 400 g","Patata y boniato 2 kg","Gofio 400 g","Avena 300 g","Pan integral 1","Tortitas de arroz 1 paquete","Plátanos 10-14","Ñoquis, placas de lasaña y tortitas de harina","Carne picada magra 600 g","Aceite de oliva virgen extra","Crema de cacahuete 1 bote","Nueces o almendras 200 g","Verdura variada 2-3 kg","Fruta 7 piezas"];
+const W={
+A:["Lunes · A",[["Sentadilla trasera","4×6-8"],["Press banca","4×6-8"],["Remo con barra","3×8-10"],["Press militar con mancuernas","3×8-10"],["Curl femoral","3×10-12"],["Curl bíceps","2×10-12"],["Plancha","3×30-45 s"]]],
+B:["Miércoles · B",[["Peso muerto rumano","4×6-8"],["Dominadas o jalón","4×8-10"],["Press inclinado con mancuernas","3×8-10"],["Prensa","3×10-12"],["Elevaciones laterales","3×12-15"],["Tríceps en polea","3×10-12"],["Crunch en polea","3×10-12"]]],
+C:["Viernes · C",[["Zancadas búlgaras (por pierna)","3×8-10"],["Fondos o press cerrado","3×8-10"],["Remo en polea","3×10-12"],["Hip thrust","3×8-10"],["Face pull","3×12-15"],["Curl martillo","2×10-12"],["Press francés","2×10-12"],["Rueda abdominal / farmer walk","3 series"]]]};
+const FF={Barlow:'"Barlow",system-ui,sans-serif',Sistema:"system-ui,-apple-system,sans-serif",Serif:"Georgia,serif",Mono:"ui-monospace,Menlo,monospace",Redondeada:'"Avenir Next Rounded","Nunito",system-ui,sans-serif'};
+const cur=()=>{if(!S.start)return 1;const w=Math.floor((Date.now()-new Date(S.start))/6048e5)+1;return Math.max(1,Math.min(17,w))};
+if(!S.w)S.w=cur();
+const wsel=()=>`<select data-wk>${Array.from({length:17},(_,i)=>`<option value=${i+1}${i+1==S.w?" selected":""}>Semana ${i+1}${i+1==cur()?" (actual)":""}</option>`).join("")}</select>`;
+function vD(){let h=`<h2>Dieta</h2><p class=mut>Objetivo: 2.400-2.600 kcal y 130-160 g de proteína. Cambia cada comida con el desplegable. Agua: 2,5-3 L al día.</p>`;
+D.forEach((n,d)=>{let t=[0,0,0,0],b="";SL.forEach(([sn,o],s)=>{const id=gm(d,s),m=M[id];for(let i=0;i<4;i++)t[i]+=m[i+1];
+b+=`<div class=i><b>${sn}</b><select data-m="${d}|${s}">${o.map(x=>`<option value=${x}${x==id?" selected":""}>${M[x][0]}</option>`).join("")}</select><div class=mut>${m[1]} kcal · ${m[2]} P · ${m[3]} C · ${m[4]} G</div><div class=mut>${m[5]}</div></div>`});
+h+=`<details${d==OD?" open":""}><summary>${n}: ${t[0]} kcal, ${t[1]} g de proteína</summary>${b}<p class=mut>Hidratos ${t[2]} g · grasas ${t[3]} g</p></details>`});
+h+=`<details><summary>Lista de la compra (Mercadona / Lidl)</summary>${SHOP.map((x,i)=>`<label style="font-weight:400"><input type=checkbox data-sh=${i}${S.shop[i]?" checked":""}> ${x}</label>`).join("")}<p class=mut>Batch cooking el sábado (unas 3 h): hornear pollo y pavo, asar verduras y boniato, cocer arroz y pasta, y porcionar 5-6 tuppers.</p></details>`;return h}
+function vE(){const w=S.w;let h=`<h2>Entreno</h2><p class=mut>Cuerpo completo ×3, 60-75 min. Calentamiento: 5 min de cardio suave, movilidad y 2 series de aproximación. Descansos: 2-3 min en básicos y 60-90 s en accesorios. Progresión: con 1-2 repeticiones en reserva, sube un 2,5-5% el peso al llegar al tope del rango en todas las series. Cada 6 semanas, descarga.</p>${wsel()}`;
+for(const k in W){h+=`<div class=card><b>${W[k][0]}</b><div class=wrap><table><tr><th>Ejercicio<th>Series<th>kg<th>Antes</tr>${W[k][1].map(([e,s])=>{const p=S.log[w-1]?.[e];return`<tr><td>${e}<td>${s}<td><input type=number step=.5 inputmode=decimal data-w="${e}" value="${S.log[w]?.[e]??""}"><td class=mut>${p||"-"}</tr>`}).join("")}</table></div></div>`}
+h+=`<details><summary>Mi progreso por ejercicio</summary><div class="wrap i"><table><tr><th>Ejercicio<th>Inicio<th>Ahora<th>Cambio</tr>`;
+for(const k in W)W[k][1].forEach(([e])=>{const v=Object.keys(S.log).sort((a,b)=>a-b).map(x=>+S.log[x][e]).filter(Boolean);if(v.length){const d=v[v.length-1]-v[0];h+=`<tr><td>${e}<td>${v[0]}<td>${v[v.length-1]}<td>${d>0?"+":""}${d}</tr>`}});
+return h+`</table></div></details>`}
+function sess(w){if(w<=4)return`${[4,4.5,5,4][w-1]} km suaves (6:00-6:20 por km, aún puedes hablar).`;
+if(w<=8)return`10 min suaves + ${[5,6,7,6][w-5]}×(2 min rápido / 2 min suave) + 5 min de enfriamiento.`;
+if(w<=12)return`10 min suaves + ${[4,5,5,4][w-9]}×3 min fuertes (5:00-5:20 por km) con 2 min suaves entre medias + 5 min de enfriamiento.`;
+if(w<=16)return w%2?`20 min a ritmo cómodo-fuerte, con 10 min de calentamiento y 5 de enfriamiento.`:`10 min suaves + 5×3 min fuertes con 2 min suaves + 5 min de enfriamiento.`;
+return"Test de 5 km: calienta 10 min y corre a ritmo fuerte pero sostenible. Apunta el tiempo."}
+function vR(){const w=S.w,f=S.run[w]?.fb,L=["Muy fácil","Bien","Duro","Muy duro"],A=["Sube un escalón: +0,5 km o 10 s/km más rápido.","Sigue el plan tal cual.","Repite esta sesión antes de avanzar.","Baja un escalón (menos distancia o más suave) y revisa sueño y comida."];
+return`<h2>Running</h2><p class=mut>Una sesión a la semana (martes) para mejorar el cardio y la parte anaeróbica.</p>${wsel()}<div class=card><b>Sesión de la semana ${w}</b><p>${sess(w)}</p><b>¿Cómo fue?</b><div class=fb>${L.map((x,i)=>`<button data-fb=${i+1} class="${f==i+1?"on":""}">${x}</button>`).join("")}</div>${f?`<p><b>Siguiente paso:</b> ${A[f-1]}</p>`:""}</div><div class=card><b>Jueves: estiramientos y meditación (25 min)</b><p class=mut>Caderas, isquios, pectoral y espalda (30-45 s por postura). Cierra con 5-10 min de respiración guiada: inhala 4 s, exhala 6 s.</p></div><div class=card><b>Pasos diarios</b><p class=mut>Semanas 1-4: 6.000-7.000 · 5-8: 7.500-8.500 · 9-17: 8.000-10.000. Levántate 2-3 min cada hora.</p></div>`}
+function wkAvg(){const p=[...S.prog].filter(e=>e.w&&e.d).sort((a,b)=>a.d<b.d?-1:1);if(!p.length)return[];const t0=new Date(p[0].d),g={};p.forEach(e=>{const i=Math.floor((new Date(e.d)-t0)/6048e5);(g[i]=g[i]||[]).push(+e.w)});return Object.keys(g).map(i=>[+i+1,g[i].reduce((a,b)=>a+b)/g[i].length])}
+function vP(){const a=wkAvg(),n=a.length;let adv="Registra al menos 2 semanas para ver la tendencia.";
+if(n>1){const d=a[n-1][1]-a[n-2][1];adv=d>.3?"Subes rápido: si la cintura también sube, baja 100-150 kcal.":d>=.05?"Ritmo ideal de ganancia: mantén el plan.":"Peso estable: si pasan 2-3 semanas sin cambio y la cintura no baja, sube 100-150 kcal (carbohidratos)."}
+const t=new Date().toISOString().slice(0,10);
+return`<h2>Progreso</h2><p class=mut>Pésate en ayunas y compara medias semanales, no días sueltos. Cintura a la altura del ombligo, 1 vez por semana. Fotos cada 2 semanas.</p><div class=card><div class=g><div><label>Fecha</label><input id=fd type=date value="${t}"></div><div><label>Peso (kg)</label><input id=fw type=number step=.1 inputmode=decimal></div><div><label>Cintura (cm)</label><input id=fc type=number step=.5 inputmode=decimal></div><div><label>Pasos</label><input id=fp type=number inputmode=numeric></div><div><label>Sueño (h)</label><input id=fs2 type=number step=.5 inputmode=decimal></div><div><label>Energía (1-5)</label><input id=fe type=number min=1 max=5></div><div><label>Dieta cumplida (%)</label><input id=fa type=number min=0 max=100></div></div><p><button data-a=add>Guardar registro</button> <button data-a=del style="background:rgba(128,128,128,.25);color:var(--fg)">Borrar el último</button></p></div>
+<div class=card><b>Medias semanales de peso</b><p>${n?a.map((x,i)=>`Semana ${x[0]}: ${x[1].toFixed(1)} kg${i?` (${x[1]-a[i-1][1]>0?"+":""}${(x[1]-a[i-1][1]).toFixed(1)})`:""}`).join("<br>"):"Sin datos todavía."}</p><p class=mut>${adv}</p></div>
+<details><summary>Registros recientes</summary><div class="wrap i"><table><tr><th>Fecha<th>kg<th>cm<th>Pasos<th>Sueño<th>Energía<th>%</tr>${[...S.prog].slice(-14).reverse().map(e=>`<tr><td>${e.d}<td>${e.w}<td>${e.c}<td>${e.p}<td>${e.s}<td>${e.e}<td>${e.a}</tr>`).join("")}</table></div></details>
+<details><summary>Revisión semanal</summary><ol><li>¿Cómo evolucionaron la media de peso y la cintura?</li><li>¿Subí cargas en los básicos?</li><li>¿Cumplí al menos el 80% de la dieta y los pasos?</li><li>¿Cómo estuvieron el sueño y la energía?</li><li>¿Qué único ajuste hago la semana que viene?</li></ol></details>`}
+function vA(){const s=S.set,c=(k,l,d)=>`<label>${l}</label><input type=color data-s=${k} value="${s[k]||d}">`,r=(k,l,mn,mx,stp,d)=>`<label>${l}</label><input type=range data-s=${k} min=${mn} max=${mx} step=${stp} value="${s[k]??d}">`;
+return`<h2>Ajustes</h2><div class=card><label>Primer día del plan</label><input type=date data-st value="${S.start}"><label>Tema</label><select data-s=theme>${[["auto","Automático"],["light","Claro"],["dark","Oscuro"]].map(([v,l])=>`<option value=${v}${(s.theme||"auto")==v?" selected":""}>${l}</option>`).join("")}</select><label>Fuente</label><select data-s=ff>${Object.keys(FF).map(k=>`<option${(s.ff||"Barlow")==k?" selected":""}>${k}</option>`).join("")}</select>${r("fs","Tamaño de letra",14,20,1,16)}</div>
+<div class=card><div class=g><div>${c("bg","Fondo","#14181b")}</div><div>${c("fg","Texto","#e9ecee")}</div><div>${c("card","Tarjetas","#1e2428")}</div><div>${c("acc","Botones y acento","#e8480f")}</div></div>${r("op","Translucidez de tarjetas (menos = más transparente)",.3,1,.02,.88)}${r("bl","Desenfoque",0,24,1,8)}${r("r","Redondeo de bordes",0,28,1,8)}<p><button data-a=reset>Restablecer estilo</button></p></div>
+<details><summary>Copia de seguridad</summary><div class=i><textarea id=bk rows=6 style="width:100%">${JSON.stringify(S).replace(/</g,"&lt;")}</textarea><p><button data-a=imp>Importar</button></p><p class=mut>Copia este texto para guardar tus datos o pégalo en otro dispositivo.</p></div></details>`}
+const h2r=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16)).join(",");
+function ap(){const s=S.set,r=document.documentElement,x=r.style;r.dataset.theme=s.theme||"auto";
+[["bg","--bg"],["fg","--fg"],["acc","--accent"]].forEach(([k,v])=>s[k]?x.setProperty(v,s[k]):x.removeProperty(v));
+s.card?x.setProperty("--card",h2r(s.card)):x.removeProperty("--card");
+x.setProperty("--op",s.op??.88);x.setProperty("--bl",(s.bl??8)+"px");x.setProperty("--r",(s.r??8)+"px");x.setProperty("--fs",(s.fs??16)+"px");x.setProperty("--ff",FF[s.ff||"Barlow"])}
+function R(){ap();$("#v").innerHTML={d:vD,e:vE,r:vR,p:vP,a:vA}[T]();document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==T))}
+document.addEventListener("change",e=>{const t=e.target,d=t.dataset;
+if(d.m){S.meals[d.m]=t.value;OD=+d.m.split("|")[0]}
+else if(d.w){(S.log[S.w]=S.log[S.w]||{})[d.w]=t.value}
+else if("wk" in d){S.w=+t.value}
+else if(d.sh!=null){S.shop[d.sh]=t.checked}
+else if(d.s){S.set[d.s]=["range"].includes(t.type)?+t.value:t.value}
+else if("st" in d){S.start=t.value}
+else return;
+save();R()});
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+if(d.t){T=d.t;scrollTo(0,0)}
+else if(d.fb){(S.run[S.w]=S.run[S.w]||{}).fb=+d.fb}
+else if(d.a=="add"){const g=k=>$("#"+k).value;S.prog.push({d:g("fd"),w:g("fw"),c:g("fc"),p:g("fp"),s:g("fs2"),e:g("fe"),a:g("fa")})}
+else if(d.a=="del"){S.prog.pop()}
+else if(d.a=="reset"){S.set={}}
+else if(d.a=="imp"){try{S=Object.assign(S,JSON.parse($("#bk").value))}catch(x){alert("El texto no es una copia de seguridad válida.")}}
+else return;
+save();R()});
+R();
+</script></body></html>
